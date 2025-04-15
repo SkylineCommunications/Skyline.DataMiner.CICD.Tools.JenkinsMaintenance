@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "CICD.Tools.JenkinsMaintenance": {
+        "commandName": "Project",
+        "commandLineArgs": "info -if C:\\Users\\MichielOD\\Downloads\\info.json"
+        //"commandLineArgs": "prepare -mf C:\\Users\\MichielOD\\Downloads\\maintenance-info.json"
+        //"commandLineArgs": "resume -mf C:\\Users\\MichielOD\\Downloads\\maintenance-info.json --safe"
+        //"commandLineArgs": "resurrect -mf C:\\Users\\MichielOD\\Downloads\\kill-info.json --safe"
+        //"commandLineArgs": "greater-resurrect --safe"
+        //"commandLineArgs": "kill -mf C:\\Users\\MichielOD\\Downloads\\kill-info.json --safe"
+    }
+  }
+}
