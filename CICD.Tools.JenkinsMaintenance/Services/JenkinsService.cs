@@ -66,7 +66,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError($"Failed to put Jenkins in quiet mode. Response: {respContent}");
+                    logger.LogError("Failed to put Jenkins in quiet mode. [{statusCode}] {reason}", response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return;
                 }
 
@@ -74,7 +75,7 @@
             }
             finally
             {
-                logger.LogDebug($"Finished {nameof(QuietDownAsync)}");
+                logger.LogDebug($"Finished {nameof(QuietDownAsync)}.");
             }
         }
 
@@ -91,7 +92,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to cancel quiet mode. Response: {respContent}", respContent);
+                    logger.LogError("Failed to cancel quiet mode. [{statusCode}] {reason}", response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return;
                 }
 
@@ -121,7 +123,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to disable job. Response: {respContent}", respContent);
+                    logger.LogError("Failed to disable job '{url}'. [{statusCode}] {reason}", url, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return false;
                 }
 
@@ -151,7 +154,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to enable job. Response: {respContent}", respContent);
+                    logger.LogError("Failed to enable job '{url}'. [{statusCode}] {reason}", url, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return false;
                 }
 
@@ -176,7 +180,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to get node information. Response: {content}", respContent);
+                    logger.LogError("Failed to get node information for '{nodeName}'. [{statusCode}] {reason}", name, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return null;
                 }
 
@@ -201,7 +206,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to get nodes. Response: {respContent}", respContent);
+                    logger.LogError("Failed to get nodes. [{statusCode}] {reason}", response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return [];
                 }
 
@@ -233,7 +239,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to get workflows. Response: {respContent}", respContent);
+                    logger.LogError("Failed to get workflows. [{statusCode}] {reason}", response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return [];
                 }
 
@@ -311,7 +318,8 @@
                 string respContent = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to get job. Response: {respContent}", respContent);
+                    logger.LogError("Failed to get job by url '{url}'. [{statusCode}] {reason}", url, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return null;
                 }
 
@@ -337,7 +345,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to get the build queue. Response: {respContent}", respContent);
+                    logger.LogError("Failed to get the build queue. [{statusCode}] {reason}", response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return null;
                 }
 
@@ -362,7 +371,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to cancel the queue item. Response: {respContent}", respContent);
+                    logger.LogError("Failed to cancel the queue item with id '{id}'. [{statusCode}] {reason}", id, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return false;
                 }
 
@@ -382,12 +392,18 @@
             {
                 EnsureSetup();
 
+                if (!url.EndsWith('/'))
+                {
+                    url += '/';
+                }
+
                 var response = await httpClient.PostAsync($"{url}{number}/kill", null);
                 string respContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to kill the job. Response: {respContent}", respContent);
+                    logger.LogError("Failed to kill the build '{number}' of job '{job}'. [{statusCode}] {reason}", number, url, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return false;
                 }
 
@@ -412,7 +428,8 @@
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError("Failed to stop the job. Response: {respContent}", respContent);
+                    logger.LogError("Failed to stop the build '{number}' of job '{job}'. [{statusCode}] {reason}", number, url, response.StatusCode, response.ReasonPhrase);
+                    logger.LogDebug("Full response: {respContent}", respContent);
                     return false;
                 }
 

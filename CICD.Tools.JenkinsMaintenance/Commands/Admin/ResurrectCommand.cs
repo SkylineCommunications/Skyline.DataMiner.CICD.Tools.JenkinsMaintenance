@@ -80,7 +80,7 @@
 
                 foreach (string workflowUrl in info.DisabledWorkflows)
                 {
-                    if (Safe is not true)
+                    if (!Safe)
                     {
                         bool result = await jenkins.EnableJobAsync(workflowUrl);
                         logger.LogInformation("Enabled job '{url}': {result}", workflowUrl, result);
@@ -99,7 +99,7 @@
                         continue;
                     }
 
-                    if (Safe is not true)
+                    if (!Safe)
                     {
                         bool result = await jenkins.ToggleNodeAsync(node.UrlName!);
                         logger.LogInformation("Enabled node '{name}': {result}", node.DisplayName, result);
@@ -110,7 +110,7 @@
                     }
                 }
 
-                if (Safe is not true)
+                if (!Safe)
                 {
                     await jenkins.CancelQuietDownAsync();
 

@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    
+    open-pull-requests-limit: 10
+
+    ignore:      
+      # FluentAssertions equal to or higher than 8.0.0 are a different license, which requires payment
+      - dependency-name: "FluentAssertions"
+        versions: [ ">=8.0.0" ]

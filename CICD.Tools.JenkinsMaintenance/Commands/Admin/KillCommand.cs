@@ -77,94 +77,13 @@
 
                 IEnumerable<Workflow> workflows = (await jenkins.GetWorkflowsAsync()).ToList();
                 KillInfo info = new KillInfo();
-                foreach (Workflow workflow in workflows)
-                {
-                    if (workflow.IsEnabled != true)
-                    {
-                        // Don't try to disable an already disabled job or jobs that can't be disabled (will give error)
-                        logger.LogInformation("Job '{jobName}' is already disabled.", workflow.DisplayName);
-                        continue;
-                    }
-
-                    if (Safe is not true)
-                    {
-                        bool result = await jenkins.DisableJobAsync(workflow.Url);
-                        logger.LogInformation("Disabled job '{name}': {result}", workflow.Name, result);
-                    }
-                    else
-                    {
-                        logger.LogInformation("Disabled job '{name}'", workflow.Name);
-                    }
-
-                    info.DisabledWorkflows.Add(workflow.Url);
-                }
-
-                // Disable all nodes
-                IEnumerable<Node> nodes = await jenkins.GetNodesAsync();
-                foreach (Node node in nodes)
-                {
-                    if (node.IsOffline == true)
-                    {
-                        // If node is offline, don't toggle as it would put it online again
-                        logger.LogInformation("Node '{nodeName}' is already disabled.", node.DisplayName);
-                        continue;
-                    }
-
-                    if (Safe is not true)
-                    {
-                        bool result = await jenkins.ToggleNodeAsync(node.UrlName!);
-                        logger.LogInformation("Disabled node '{name}': {result}", node.DisplayName, result);
-                    }
-                    else
-                    {
-                        logger.LogInformation("Disabled node '{name}'", node.DisplayName);
-                    }
-
-                    info.DisabledNodes.Add(node.DisplayName);
-                }
-
-                // Clear the build queue
-                BuildQueue? buildQueueAsync = await jenkins.GetBuildQueueAsync();
-                if (buildQueueAsync?.Items is { Count: > 0 })
-                {
-                    foreach (QueueItem queueItem in buildQueueAsync.Items)
-                    {
-                        if (Safe is not true)
-                        {
-                            bool result = await jenkins.CancelQueueItemAsync(queueItem.Id);
-                            logger.LogInformation("Cancelled queue item '{name}': {result}", queueItem.Id, result);
-                        }
-                        else
-                        {
-                            logger.LogInformation("Cancelled queue item '{name}'", queueItem.Id);
-                        }
-                    }
-                }
-
-                // Kill any running jobs
-                foreach (Workflow workflow in workflows)
-                {
-                    if (workflow.Builds == null)
-                    {
-                        continue;
-                    }
-
-                    foreach (var run in workflow.Builds.Where(build => build.Building == true))
-                    {
-                        if (Safe is not true)
-                        {
-                            bool result = await jenkins.KillJobBuildAsync(workflow.Url, run.Number);
-                            logger.LogInformation("Killed job '{name}': {result}", workflow.Name, result);
-                        }
-                        else
-                        {
-                            logger.LogInformation("Killed job '{name}'", workflow.Name);
-                        }
-                    }
-                }
+                await DisableAllJobs(workflows, info);
+                await DisableAllNodes(info);
+                await ClearBuildQueue();
+                await KillRunningJobs(workflows);
 
                 // Quiet down Jenkins
-                if (Safe is not true)
+                if (!Safe)
                 {
                     await jenkins.QuietDownAsync();
                 }
@@ -185,6 +104,101 @@
             {
                 sw.Stop();
                 logger.LogDebug($"Finished {nameof(KillCommand)} in {sw.Elapsed}.");
+            }
+        }
+
+        private async Task DisableAllJobs(IEnumerable<Workflow> workflows, KillInfo info)
+        {
+            foreach (Workflow workflow in workflows)
+            {
+                if (workflow.IsEnabled != true)
+                {
+                    // Don't try to disable an already disabled job or jobs that can't be disabled (will give error)
+                    logger.LogInformation("Job '{jobName}' is already disabled.", workflow.DisplayName);
+                    continue;
+                }
+
+                if (!Safe)
+                {
+                    bool result = await jenkins.DisableJobAsync(workflow.Url);
+                    logger.LogInformation("Disabled job '{name}': {result}", workflow.Name, result);
+                }
+                else
+                {
+                    logger.LogInformation("Disabled job '{name}'", workflow.Name);
+                }
+
+                info.DisabledWorkflows.Add(workflow.Url);
+            }
+        }
+
+        private async Task KillRunningJobs(IEnumerable<Workflow> workflows)
+        {
+            foreach (Workflow workflow in workflows)
+            {
+                if (workflow.Builds == null)
+                {
+                    continue;
+                }
+
+                foreach (var run in workflow.Builds.Where(build => build.Building == true))
+                {
+                    if (!Safe)
+                    {
+                        bool result = await jenkins.KillJobBuildAsync(workflow.Url, run.Number);
+                        logger.LogInformation("Killed job '{name}': {result}", workflow.Name, result);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Killed job '{name}'", workflow.Name);
+                    }
+                }
+            }
+        }
+
+        private async Task ClearBuildQueue()
+        {
+            BuildQueue? buildQueueAsync = await jenkins.GetBuildQueueAsync();
+            if (buildQueueAsync?.Items is { Count: > 0 })
+            {
+                foreach (QueueItem queueItem in buildQueueAsync.Items)
+                {
+                    if (!Safe)
+                    {
+                        bool result = await jenkins.CancelQueueItemAsync(queueItem.Id);
+                        logger.LogInformation("Cancelled queue item '{name}': {result}", queueItem.Id, result);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Cancelled queue item '{name}'", queueItem.Id);
+                    }
+                }
+            }
+        }
+
+        private async Task DisableAllNodes(KillInfo info)
+        {
+            IEnumerable<Node> nodes = await jenkins.GetNodesAsync();
+            foreach (Node node in nodes)
+            {
+                if (node.IsOffline == true)
+                {
+                    // If node is offline, don't toggle as it would put it online again
+                    logger.LogInformation("Node '{nodeName}' is already disabled.", node.DisplayName);
+                    continue;
+                }
+
+                if (!Safe)
+                {
+                    bool result = await jenkins.ToggleNodeAsync(node.UrlName!);
+                    logger.LogInformation("Disabled node '{name}': {result}", node.DisplayName, result);
+                }
+                else
+                {
+                    logger.LogInformation("Disabled node '{name}'", node.DisplayName);
+                }
+
+                info.DisabledNodes.Add(node.DisplayName);
             }
         }
     }
