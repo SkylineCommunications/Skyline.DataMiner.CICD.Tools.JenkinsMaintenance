@@ -108,7 +108,7 @@
         public async Task<bool> DisableJobAsync(string url)
         {
             logger.LogDebug($"Starting {nameof(DisableJobAsync)}...");
-
+            
             try
             {
                 EnsureSetup();
@@ -443,7 +443,8 @@
 
         public async Task<bool> ToggleNodeAsync(string nodeName)
         {
-            logger.LogDebug($"Starting {nameof(ToggleNodeAsync)} for '{nodeName}'...");
+            logger.LogDebug($"Starting {nameof(ToggleNodeAsync)}...");
+
             try
             {
                 EnsureSetup();

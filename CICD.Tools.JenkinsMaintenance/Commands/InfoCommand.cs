@@ -35,6 +35,11 @@
 
     internal class InfoCommandHandler(ILogger<InfoCommandHandler> logger, IJenkinsService jenkins) : BaseCommandHandler
     {
+        private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.General)
+        {
+            WriteIndented = true
+        };
+
         /* Automatic binding with System.CommandLine.NamingConventionBinder */
 
         public IFileInfoIO? InfoFile { get; set; }
@@ -69,10 +74,6 @@
                     WorkFlows = workflows.ToList()
                 };
 
-                JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.General)
-                {
-                    WriteIndented = true
-                };
                 string result = JsonSerializer.Serialize(info, jsonSerializerOptions);
 
                 if (InfoFile != null)
