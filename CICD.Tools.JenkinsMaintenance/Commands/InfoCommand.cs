@@ -63,7 +63,7 @@
                     await InfoFile.Create().DisposeAsync();
                 }
 
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 IEnumerable<Workflow> workflows = await jenkins.GetWorkflowsAsync();
                 IEnumerable<Node> nodes = await jenkins.GetNodesAsync();

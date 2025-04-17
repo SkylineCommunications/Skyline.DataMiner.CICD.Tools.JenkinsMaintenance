@@ -20,14 +20,14 @@
     {
         private bool setupComplete;
 
-        public void SetUriAndCredentials(Uri? jenkinsUri = null, string? username = null, string? token = null)
+        public void SetUriAndCredentials(Uri? jenkinsUri = null, string? userId = null, string? token = null)
         {
             if (jenkinsUri == null)
             {
-                string? uriString = configuration["Jenkins:Url"];
+                string? uriString = configuration["jenkins:uri"];
                 if (String.IsNullOrWhiteSpace(uriString))
                 {
-                    throw new InvalidOperationException("No Jenkins URL provided.");
+                    throw new InvalidOperationException("No jenkins URI provided.");
                 }
 
                 if (!uriString.EndsWith('/'))
@@ -38,17 +38,17 @@
                 jenkinsUri = new Uri(uriString);
             }
 
-            username ??= configuration["Jenkins:Username"];
-            token ??= configuration["Jenkins:Token"];
+            userId ??= configuration["jenkins:userid"];
+            token ??= configuration["jenkins:token"];
 
-            if (String.IsNullOrWhiteSpace(username) || String.IsNullOrWhiteSpace(token))
+            if (String.IsNullOrWhiteSpace(userId) || String.IsNullOrWhiteSpace(token))
             {
-                throw new InvalidCredentialException("No username or token provided.");
+                throw new InvalidCredentialException("No userid or token provided.");
             }
 
             httpClient.BaseAddress = jenkinsUri;
 
-            var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{token}"));
+            var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{userId}:{token}"));
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
             setupComplete = true;
         }

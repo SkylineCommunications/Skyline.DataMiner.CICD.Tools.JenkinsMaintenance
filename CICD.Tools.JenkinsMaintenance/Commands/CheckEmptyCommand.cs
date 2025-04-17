@@ -31,7 +31,7 @@
 
             try
             {
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 BuildQueue? buildQueueAsync = await jenkins.GetBuildQueueAsync();
                 if (buildQueueAsync?.Items.Count != 0)

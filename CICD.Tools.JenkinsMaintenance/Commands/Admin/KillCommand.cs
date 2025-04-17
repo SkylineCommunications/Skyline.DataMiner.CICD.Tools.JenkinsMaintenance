@@ -73,7 +73,7 @@
                 MaintenanceFile.Directory.Create();
                 await MaintenanceFile.Create().DisposeAsync();
 
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 IEnumerable<Workflow> workflows = (await jenkins.GetWorkflowsAsync()).ToList();
                 KillInfo info = new KillInfo();

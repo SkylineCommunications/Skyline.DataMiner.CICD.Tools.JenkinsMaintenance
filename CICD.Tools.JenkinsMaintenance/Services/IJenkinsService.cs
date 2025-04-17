@@ -12,9 +12,9 @@
         /// Set the Jenkins URI and credentials.
         /// </summary>
         /// <param name="jenkinsUri">The jenkins uri.</param>
-        /// <param name="username">The username.</param>
-        /// <param name="token">The token for the specified username.</param>
-        void SetUriAndCredentials(Uri? jenkinsUri = null, string? username = null, string? token = null);
+        /// <param name="userId">The user-id.</param>
+        /// <param name="token">The token for the specified user-id.</param>
+        void SetUriAndCredentials(Uri? jenkinsUri = null, string? userId = null, string? token = null);
 
         /// <summary>
         /// Quiet down Jenkins.

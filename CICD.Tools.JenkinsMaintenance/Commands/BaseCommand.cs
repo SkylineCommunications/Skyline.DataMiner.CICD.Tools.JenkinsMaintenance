@@ -11,13 +11,13 @@
         {
             AddOption(new Option<Uri?>(
                 aliases: ["--uri", "-uri"],
-                description: "The uri of the Jenkins to connect to. Can also be provided via an environment variable: 'Jenkins__Url'"));
+                description: "The uri of the Jenkins to connect to. Can also be provided via an environment variable: 'jenkins__uri'"));
             AddOption(new Option<string?>(
-                aliases: ["--username", "-u"],
-                description: "The 'Jenkins User ID' of the user to connect to Jenkins. Can also be provided via an environment variable: 'Jenkins__Username'"));
+                aliases: ["--jenkins-user-id", "-u"],
+                description: "The 'Jenkins User ID' of the user to connect to Jenkins. Can also be provided via an environment variable: 'jenkins__userid'"));
             AddOption(new Option<string?>(
                 aliases: ["--token", "-t"],
-                description: "The token of the Jenkins to connect to. Can also be provided via an environment variable: 'Jenkins__Token'"));
+                description: "The token of the Jenkins to connect to. Can also be provided via an environment variable: 'jenkins__token'"));
         }
     }
 
@@ -27,7 +27,7 @@
 
         public Uri? Uri { get; set; }
 
-        public string? Username { get; set; }
+        public string? JenkinsUserId { get; set; }
 
         public string? Token { get; set; }
 

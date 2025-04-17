@@ -67,7 +67,7 @@
 
             try
             {
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 KillInfo info;
 

@@ -63,7 +63,7 @@
                 MaintenanceFile.Directory.Create();
                 await MaintenanceFile.Create().DisposeAsync();
 
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 MaintenanceInfo info = new MaintenanceInfo();
 

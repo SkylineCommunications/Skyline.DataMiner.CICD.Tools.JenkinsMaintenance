@@ -53,7 +53,7 @@
 
             try
             {
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 var workflows = await jenkins.GetWorkflowsAsync();
                 foreach (var workflow in workflows)

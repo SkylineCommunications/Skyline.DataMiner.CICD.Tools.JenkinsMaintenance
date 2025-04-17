@@ -3,9 +3,12 @@
     using System;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.Diagnostics;
     using System.IO;
     using System.Text.Json;
+    using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
 
     using Microsoft.Extensions.Logging;
 
@@ -28,6 +31,10 @@
                 IsRequired = true
             }.LegalFilePathsOnly()!.ExistingOnly());
 
+            AddOption(new Option<UInt32?>(
+            aliases: ["--wait-until-up", "-w"],
+            description: "Will retry until jenkins service is available or provided timeout time in minutes. Waits infinite when providing 0. Never waits when left empty."));
+
             AddOption(new Option<bool?>(
                 aliases: ["--safe", "-s"],
                 description: "Safety option to test the command without changing things on Jenkins."));
@@ -39,6 +46,8 @@
         /* Automatic binding with System.CommandLine.NamingConventionBinder */
 
         public required IFileInfoIO MaintenanceFile { get; set; }
+
+        public UInt32? WaitUntilUp { get; set; }
 
         public bool? Safe { get; set; }
 
@@ -58,7 +67,34 @@
 
             try
             {
-                jenkins.SetUriAndCredentials(Uri, Username, Token);
+                jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
+
+                if (WaitUntilUp != null)
+                {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    UInt32 waitInMs = (UInt32)WaitUntilUp * 60 * 1000;
+                    bool isUp = false;
+                    while (!isUp && (WaitUntilUp == 0 || sw.ElapsedMilliseconds <= waitInMs))
+                    {
+                        logger.LogInformation("Checking if Jenkins is up...");
+                        try
+                        {
+                            if (await jenkins.GetBuildQueueAsync() != null) isUp = true;
+                        }
+                        catch
+                        {
+                            isUp = false;
+                        }
+
+                        logger.LogInformation("Jenkins status: {isUp}", isUp ? "Up" : "Down");
+
+                        // Always wait a minute to allow all jenkins nodes to become ready for API calls even when UP.
+                        Thread.Sleep(60000);
+                    }
+
+                    sw.Stop();
+                }
 
                 MaintenanceInfo info;
 
@@ -66,6 +102,13 @@
                 using (StreamReader streamReader = MaintenanceFile.OpenText())
                 {
                     string json = await streamReader.ReadToEndAsync();
+
+                    if (String.IsNullOrEmpty(json))
+                    {
+                        logger.LogError("Maintenance File was empty, unable to resume.");
+                        return (int)ExitCodes.GeneralError;
+                    }
+
                     info = JsonSerializer.Deserialize<MaintenanceInfo>(json) ?? new MaintenanceInfo();
                 }
 
