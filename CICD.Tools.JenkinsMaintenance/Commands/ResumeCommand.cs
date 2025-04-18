@@ -68,32 +68,7 @@
             {
                 jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
-                if (WaitUntilUp != null)
-                {
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    uint waitInMs = (uint)WaitUntilUp * 60 * 1000;
-                    bool isUp = false;
-                    while (!isUp && (WaitUntilUp == 0 || sw.ElapsedMilliseconds <= waitInMs))
-                    {
-                        logger.LogInformation("Checking if Jenkins is up...");
-                        try
-                        {
-                            if (await jenkins.GetBuildQueueAsync() != null) isUp = true;
-                        }
-                        catch
-                        {
-                            isUp = false;
-                        }
-
-                        logger.LogInformation("Jenkins status: {isUp}", isUp ? "Up" : "Down");
-
-                        // Always wait a minute to allow all jenkins nodes to become ready for API calls even when UP.
-                        Thread.Sleep(60000);
-                    }
-
-                    sw.Stop();
-                }
+                await WaitUntilJenkinsIsUp();
 
                 MaintenanceInfo info;
 
@@ -111,7 +86,7 @@
                     info = JsonSerializer.Deserialize<MaintenanceInfo>(json) ?? new MaintenanceInfo();
                 }
 
-                foreach (string nodeUrlName in info.DisabledNodes ?? [])
+                foreach (string nodeUrlName in info.DisabledNodes)
                 {
                     Node? node = await jenkins.GetNodeAsync(nodeUrlName);
                     if (node == null)
@@ -154,6 +129,38 @@
             {
                 logger.LogDebug($"Finished {nameof(ResumeCommand)}.");
             }
+        }
+
+        private async Task WaitUntilJenkinsIsUp()
+        {
+            if (WaitUntilUp == null)
+            {
+                return;
+            }
+
+            Stopwatch sw = Stopwatch.StartNew();
+            uint waitInMs = (uint)WaitUntilUp * 60 * 1_000;
+            bool isUp = false;
+            while (!isUp && (WaitUntilUp == 0 || sw.ElapsedMilliseconds <= waitInMs))
+            {
+                logger.LogInformation("Checking if Jenkins is up...");
+
+                try
+                {
+                    isUp = await jenkins.GetBuildQueueAsync() != null;
+                }
+                catch
+                {
+                    isUp = false;
+                }
+
+                logger.LogInformation("Jenkins status: {isUp}", isUp ? "Up" : "Down");
+
+                // Always wait a minute to allow all jenkins nodes to become ready for API calls even when UP.
+                Thread.Sleep(60_000);
+            }
+
+            sw.Stop();
         }
     }
 }
