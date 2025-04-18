@@ -8,7 +8,6 @@
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
 
     using Microsoft.Extensions.Logging;
 
@@ -31,7 +30,7 @@
                 IsRequired = true
             }.LegalFilePathsOnly()!.ExistingOnly());
 
-            AddOption(new Option<UInt32?>(
+            AddOption(new Option<uint?>(
             aliases: ["--wait-until-up", "-w"],
             description: "Will retry until jenkins service is available or provided timeout time in minutes. Waits infinite when providing 0. Never waits when left empty."));
 
@@ -47,7 +46,7 @@
 
         public required IFileInfoIO MaintenanceFile { get; set; }
 
-        public UInt32? WaitUntilUp { get; set; }
+        public uint? WaitUntilUp { get; set; }
 
         public bool? Safe { get; set; }
 
@@ -73,7 +72,7 @@
                 {
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
-                    UInt32 waitInMs = (UInt32)WaitUntilUp * 60 * 1000;
+                    uint waitInMs = (uint)WaitUntilUp * 60 * 1000;
                     bool isUp = false;
                     while (!isUp && (WaitUntilUp == 0 || sw.ElapsedMilliseconds <= waitInMs))
                     {
@@ -103,7 +102,7 @@
                 {
                     string json = await streamReader.ReadToEndAsync();
 
-                    if (String.IsNullOrEmpty(json))
+                    if (String.IsNullOrWhiteSpace(json))
                     {
                         logger.LogError("Maintenance File was empty, unable to resume.");
                         return (int)ExitCodes.GeneralError;
@@ -112,7 +111,7 @@
                     info = JsonSerializer.Deserialize<MaintenanceInfo>(json) ?? new MaintenanceInfo();
                 }
 
-                foreach (string nodeUrlName in info.DisabledNodes)
+                foreach (string nodeUrlName in info.DisabledNodes ?? [])
                 {
                     Node? node = await jenkins.GetNodeAsync(nodeUrlName);
                     if (node == null)

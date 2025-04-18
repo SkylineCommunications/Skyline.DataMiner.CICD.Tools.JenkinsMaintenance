@@ -8,6 +8,6 @@ namespace Skyline.DataMiner.CICD.Tools.JenkinsMaintenance.Models
     internal class MaintenanceInfo
     {
         [JsonPropertyName("disabledNodes")]
-        public List<string> DisabledNodes { get; set; } = [];
+        public List<string>? DisabledNodes { get; set; } = [];
     }
 }
