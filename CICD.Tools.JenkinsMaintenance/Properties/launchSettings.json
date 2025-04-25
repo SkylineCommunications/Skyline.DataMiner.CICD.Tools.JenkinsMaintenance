@@ -1,13 +1,7 @@
 {
   "profiles": {
     "CICD.Tools.JenkinsMaintenance": {
-        "commandName": "Project",
-        "commandLineArgs": "info -if %USERPROFILE%\\Documents\\JenkinsMaintenance\\info.json"
-        //"commandLineArgs": "prepare -mf %USERPROFILE%\\Documents\\JenkinsMaintenance\\maintenance-info.json"
-        //"commandLineArgs": "resume -mf %USERPROFILE%\\Documents\\JenkinsMaintenance\\maintenance-info.json --safe"
-        //"commandLineArgs": "resurrect -mf %USERPROFILE%\\Documents\\JenkinsMaintenance\\kill-info.json --safe"
-        //"commandLineArgs": "greater-resurrect --safe"
-        //"commandLineArgs": "kill -mf %USERPROFILE%\\Documents\\JenkinsMaintenance\\kill-info.json --safe"
+      "commandName": "Project"
     }
   }
 }

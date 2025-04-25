@@ -175,7 +175,7 @@
             {
                 EnsureSetup();
 
-                var response = await httpClient.GetAsync($"computer/{HttpUtility.UrlEncode(name)}/api/json?tree={Node.Tree}");
+                var response = await httpClient.GetAsync($"computer/{Uri.EscapeDataString(name)}/api/json?tree={Node.Tree}");
                 string respContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
@@ -448,8 +448,7 @@
             try
             {
                 EnsureSetup();
-
-                var response = await httpClient.PostAsync($"computer/{HttpUtility.UrlEncode(nodeName)}/toggleOffline", null);
+                var response = await httpClient.PostAsync($"computer/{Uri.EscapeDataString(nodeName)}/toggleOffline", null);
                 string respContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)

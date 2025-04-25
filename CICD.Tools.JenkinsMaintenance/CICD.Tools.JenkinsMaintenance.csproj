@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Skyline.DataMiner.CICD.Tools.JenkinsMaintenance</AssemblyName>
     <RootNamespace>Skyline.DataMiner.CICD.Tools.JenkinsMaintenance</RootNamespace>
-    <PackageVersion>1.0.1</PackageVersion>
-    <Version>1.0.1</Version>
+    <PackageVersion>1.0.2-alpha</PackageVersion>
+    <Version>1.0.2-alpha</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
