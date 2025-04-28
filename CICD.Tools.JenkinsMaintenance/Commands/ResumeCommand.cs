@@ -28,7 +28,7 @@
                 parseArgument: OptionHelper.ParseFileInfo!)
             {
                 IsRequired = true
-            }.LegalFilePathsOnly()!.ExistingOnly());
+            }.LegalFilePathsOnly());
 
             AddOption(new Option<uint?>(
             aliases: ["--wait-until-up", "-w"],
@@ -69,6 +69,12 @@
                 jenkins.SetUriAndCredentials(Uri, JenkinsUserId, Token);
 
                 await WaitUntilJenkinsIsUp();
+
+                if (!MaintenanceFile.Exists)
+                {
+                    logger.LogInformation("Maintenance file ({filePath}) does not exist. Skipping the resume.", MaintenanceFile.FullName);
+                    return (int)ExitCodes.Ok;
+                }
 
                 MaintenanceInfo info;
 
