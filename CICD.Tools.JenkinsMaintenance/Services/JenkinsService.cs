@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Security.Authentication;
     using System.Text;
@@ -451,7 +452,7 @@
                 var response = await httpClient.PostAsync($"computer/{Uri.EscapeDataString(nodeName)}/toggleOffline", null);
                 string respContent = await response.Content.ReadAsStringAsync();
 
-                if (!response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode || response.StatusCode != HttpStatusCode.Found)
                 {
                     logger.LogError("Failed to toggle the node '{nodeName}'. [{statusCode}] {reason}", nodeName, response.StatusCode, response.ReasonPhrase);
                     logger.LogDebug("Full response: {respContent}", respContent);
