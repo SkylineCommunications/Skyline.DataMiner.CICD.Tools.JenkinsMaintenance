@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.CICD.Tools.JenkinsMaintenance
 {
+    using System;
     using System.CommandLine;
     using System.CommandLine.Builder;
     using System.CommandLine.Hosting;
@@ -13,10 +14,13 @@
     using Serilog;
     using Serilog.Events;
 
+    using Skyline.DataMiner.CICD.FileSystem;
+    using Skyline.DataMiner.CICD.FileSystem.DirectoryInfoWrapper;
     using Skyline.DataMiner.CICD.Tools.JenkinsMaintenance.Commands;
     using Skyline.DataMiner.CICD.Tools.JenkinsMaintenance.Commands.Admin;
     using Skyline.DataMiner.CICD.Tools.JenkinsMaintenance.Helpers;
     using Skyline.DataMiner.CICD.Tools.JenkinsMaintenance.Services;
+    using Skyline.DataMiner.CICD.Tools.JenkinsMaintenance.SystemCommandLine;
 
     /// <summary>
     /// This .NET tool allows you to manage Jenkins for maintenance windows.
@@ -60,14 +64,33 @@
                 name: "--minimum-log-level",
                 description: "Indicates what the minimum log level should be. Default is Information", getDefaultValue: () => LogEventLevel.Information);
 
+            var logDirectory = new Option<DirectoryInfo?>(
+                name: "--log-directory",
+                description: "Indicates where the logging should be stored.",
+                parseArgument: OptionHelper.ParseDirectoryInfo);
+
             rootCommand.AddGlobalOption(isDebug);
             rootCommand.AddGlobalOption(logLevel);
+            rootCommand.AddGlobalOption(logDirectory);
 
             ParseResult parseResult = rootCommand.Parse(args);
             LogEventLevel level = parseResult.GetValueForOption(isDebug)
                 ? LogEventLevel.Debug
                 : parseResult.GetValueForOption(logLevel);
 
+            DirectoryInfo? logDir = parseResult.GetValueForOption(logDirectory);
+            if (logDir == null)
+            {
+                // Store default in %APPDATA%/Skyline Communications/JenkinsMaintenance
+                string loggingDirectory = FileSystem.Instance.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Skyline Communications",
+                    "JenkinsMaintenance");
+
+                logDir = new DirectoryInfo(loggingDirectory);
+            }
+
+            logDir.Create(); // Create the directory if it does not exist
             var builder = new CommandLineBuilder(rootCommand).UseDefaults().UseHost(host =>
             {
                 host.ConfigureServices(services =>
@@ -78,6 +101,7 @@
                                         new LoggerConfiguration()
                                             .MinimumLevel.Is(level)
                                             .WriteTo.Console()
+                                            .WriteTo.File(FileSystem.Instance.Path.Combine(logDir.FullName, "log.txt"), rollingInterval: RollingInterval.Month)
                                             .CreateLogger());
                                 })
                                 .AddSingleton<JenkinsJsonParser>()
